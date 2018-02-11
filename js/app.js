@@ -127,17 +127,16 @@ var breweryPlaceData = [
 // Initialize the map
 var map;
 var markers = [];
-var centerLat = 39.594924;
-var centerLng = -104.884051;
+var centerLat = 39.566631;
+var centerLng = -104.872287;
 
 function initMap() {
-
+    "use strict";
     map = new google.maps.Map(document.getElementById('map'), {
         center: new google.maps.LatLng(centerLat, centerLng),
         zoom: 11,
         disableDefaultUI: true
     });
-
     // Keep map centered on window resize
     google.maps.event.addDomListener(window, 'resize', function() {
         // The following resets to the pre-defined center centered in the map window
@@ -150,6 +149,7 @@ function initMap() {
         map.setCenter(center);
     });
 
+    // Move the following to the ViewModel
     var breweryInfowindow = new google.maps.InfoWindow();
 
     for (var i = 0; i < breweryPlaceData.length; i++) {
@@ -166,7 +166,7 @@ function initMap() {
         animation: google.maps.Animation.DROP,
       });
       markers.push(marker);
-      marker.addListener('mouseover', function() {
+      marker.addListener('click', function() {
         populateInfoWindow(this, breweryInfowindow);
       });
     };
@@ -191,3 +191,33 @@ function populateInfoWindow(marker, infowindow) {
         });
     }
 }
+
+/* ---------- Place Constructor ---------- */
+// Function to gather and bind data for each brewery
+var Place = function(data){
+    this.name = ko.observable(data.name);
+    this.lat = ko.observable(data.location.lat);
+    this.lng = ko.observable(data.location.lng);
+    this.type = ko.observable(data.type);
+    // Gotta get the marker
+    this.marker = ko.observable();
+    // Add other data points as investigation in to
+    // UnTappd API continues
+};
+
+/* ---------- View Model ---------- */
+var viewModel = function () {
+
+    var self = this;
+
+    // First, we need to create an empty Knockout observable array of brewery places
+    this.breweryList = ko.observableArray([]);
+
+    // Next, create Place objects for all breweryPlaceData listed in the model
+    breweryPlaceData.forEach(function(brewery){
+        self.breweryList.push( new Place(brewery) );
+    });
+
+};
+
+ko.applyBindings(new viewModel());
