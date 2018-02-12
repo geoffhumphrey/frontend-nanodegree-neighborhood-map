@@ -22,14 +22,20 @@
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
       <a class="navbar-brand" href="#">Breweries of South Denver</a>
+      <form class="form-inline d-sm-block d-md-none my-sm-1 my-1 my-lg-0">
+          <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
+        </form>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navCollapse" aria-controls="navCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navCollapse">
-        <form class="form-inline d-sm-block d-md-none my-sm-1 my-1 my-lg-0">
-          <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search">
-        </form>
         <ul class="navbar-nav mr-auto">
+          <li class="nav-item dropdown d-sm-block d-md-none">
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose a Brewery</a>
+            <div id="brewery-list" class="dropdown-menu" aria-labelledby="dropdown01" data-bind="foreach: visibleBreweries">
+              <a class="dropdown-item small" href="#" data-bind="text: name, click: $parent.showBreweryInfo"></a>
+            </div>
+          </li>
           <li class="nav-item">
             <a class="btn btn-primary btn-sm my-sm-1 my-1" href="#">View Taprooms Only</a>
           </li>
@@ -42,12 +48,7 @@
           <li class="nav-item">
             <a class="btn btn-danger btn-sm my-sm-1 my-1" href="#">View None</a>
           </li>
-          <li class="nav-item dropdown d-sm-block d-md-none">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose a Brewery</a>
-            <div id="brewery-list" class="dropdown-menu" aria-labelledby="dropdown01" data-bind="foreach: breweryList">
-              <a class="dropdown-item small" href="#" data-bind="text: name"></a>
-            </div>
-          </li>
+
         </ul>
       </div>
     </nav>
@@ -58,10 +59,10 @@
             <div class="card-header bg-secondary text-light"><strong>On This Map...</strong></div>
             <div class="card-body bg-light">
               <form class="form my-2 my-lg-0">
-                <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search">
+                <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
               </form>
-              <ul class="list-unstyled" data-bind="foreach: breweryList">
-                <li class="small"><a href="#" data-bind="text: name"></a></li>
+              <ul class="list-unstyled" data-bind="foreach: visibleBreweries">
+                <li class="small"><a href="#" data-bind="text: name, click: $parent.showBreweryInfo"></a></li>
               </ul>
             </div>
           </div>

@@ -11,127 +11,129 @@
 
 var breweryPlaceData = [
     {
-        name: "Dry Dock Brewing Company - South Dock",
+        name: 'Dry Dock Brewing Company - South Dock',
         location: { lat: 39.652665, lng: -104.812040 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Copper Kettle Brewing Company",
+        name: 'Copper Kettle Brewing Company',
         location: { lat: 39.692681, lng: -104.891341 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Comrade Brewing Company",
+        name: 'Comrade Brewing Company',
         location: { lat: 39.675659, lng: -104.898488 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Peak to Peak Tap & Brew",
+        name: 'Peak to Peak Tap & Brew',
         location: { lat: 39.674087, lng: -104.793862 },
         type: [ 'Taproom' , 'Brewpub', 'Taphouse' ]
     },
     {
-        name: "Declaration Brewing Company",
+        name: 'Declaration Brewing Company',
         location: { lat: 39.679765, lng: -104.990782 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "True Brewing Company",
+        name: 'True Brewing Company',
         location: { lat: 39.719919, lng: -104.987686 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Living the Dream Brewing",
+        name: 'Living the Dream Brewing',
         location: { lat: 39.540528, lng: -105.039922 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Grist Brewing Company",
+        name: 'Grist Brewing Company',
         location: { lat: 39.549058, lng: -105.033849 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Ursula Brewing",
+        name: 'Ursula Brewing',
         location: { lat: 39.748301, lng: -104.838031 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Launch Pad Brewery",
+        name: 'Launch Pad Brewery',
         location: { lat: 39.700827, lng: -104.789906 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Lone Tree Brewing Company",
+        name: 'Lone Tree Brewing Company',
         location: { lat: 39.562658, lng: -104.892868 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "105 West Brewing Company",
+        name: '105 West Brewing Company',
         location: { lat: 39.380952, lng: -104.867617 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Locavore Beer Works",
+        name: 'Locavore Beer Works',
         location: { lat: 39.608641, lng: -105.036131 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "38 State Brewing Company",
+        name: '38 State Brewing Company',
         location: { lat: 39.568826, lng: -104.989762 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Halfpenny Brewing Company",
+        name: 'Halfpenny Brewing Company',
         location: { lat: 39.593525, lng: -104.927406 },
-        type: [ 'Taproom' ]
+        type: 'Taproom'
     },
     {
-        name: "Blue Spruce Brewing Company",
+        name: 'Blue Spruce Brewing Company',
         location: { lat: 39.566910, lng: -104.939904 },
-        type: [ 'Brewpub' ]
+        type: 'BrewPub'
     },
     {
-        name: "Rockyard American Grill and Brewing Company",
+        name: 'Rockyard American Grill and Brewing Company',
         location: { lat: 39.409238, lng: -104.869859 },
-        type: [ 'Brewpub' ]
+        type: 'BrewPub'
     },
     {
-        name: "Breckenridge Brewery Farm House",
+        name: 'Breckenridge Brewery Farm House',
         location: { lat: 39.593803, lng: -105.023768 },
-        type: [ 'Brewpub' ]
+        type: 'BrewPub'
     },
     {
-        name: "Dad & Dudes Breweria",
+        name: 'Dad & Dudes Breweria',
         location: { lat: 39.593947, lng: -104.806407 },
-        type: [ 'Brewpub' ]
+        type: 'BrewPub'
     },
     {
-        name: "Pints Pub Brewery and Freehouse",
+        name: 'Pints Pub Brewery and Freehouse',
         location: { lat: 39.736973, lng: -104.990853 },
-        type: [ 'Taproom' , 'Brewpub', 'Taphouse' ]
+        type: 'Brewpub'
     },
     {
-        name: "Vine Street Pub & Brewery",
+        name: 'Vine Street Pub & Brewery',
         location: { lat: 39.743472, lng: -104.961993 },
-        type: [ 'Brewpub' ]
+        type: 'Brewpub'
     },
     {
-        name: "FanDraught Sports Brewery",
+        name: 'FanDraught Sports Brewery',
         location: { lat: 39.552105, lng: -104.773501 },
-        type: [ 'Taproom' , 'Brewpub', 'Taphouse' ]
+        type: 'Brewpub'
     }
 ];
 
 // First pass on getting map elements to work.
 // TODO: Break up into MV* for use by Knockout
 // Initialize the map
+
+/*
 var map;
 var markers = [];
 var centerLat = 39.566631;
 var centerLng = -104.872287;
 
 function initMap() {
-    "use strict";
+    'use strict';
     map = new google.maps.Map(document.getElementById('map'), {
         center: new google.maps.LatLng(centerLat, centerLng),
         zoom: 11,
@@ -149,7 +151,8 @@ function initMap() {
         map.setCenter(center);
     });
 
-    // Move the following to the ViewModel
+
+    // Initialize the Google API's InfoWindow
     var breweryInfowindow = new google.maps.InfoWindow();
 
     for (var i = 0; i < breweryPlaceData.length; i++) {
@@ -192,6 +195,8 @@ function populateInfoWindow(marker, infowindow) {
     }
 }
 
+*/
+
 /* ---------- Place Constructor ---------- */
 // Function to gather and bind data for each brewery
 var Place = function(data){
@@ -209,15 +214,122 @@ var Place = function(data){
 var viewModel = function () {
 
     var self = this;
+    var marker;
 
-    // First, we need to create an empty Knockout observable array of brewery places
-    this.breweryList = ko.observableArray([]);
+    // First, we need to create an empty Knockout observable array of breweries
+    // This will be used to place markers on the map, create InfoWindows, etc.
+    self.breweryList = ko.observableArray([]);
+
+    // Then, create another array for the ul list of breweries
+    // This will be used for filtering functions
+    self.visibleBreweries = ko.observableArray();
 
     // Next, create Place objects for all breweryPlaceData listed in the model
     breweryPlaceData.forEach(function(brewery){
         self.breweryList.push( new Place(brewery) );
     });
 
+    // Initialize the infoWindow
+    // Declaring a single instance of it OUTSIDE of the loop below
+    // This results in only one InfoWindow open at a time in the DOM
+    // Help: https://stackoverflow.com/questions/24951991/open-only-one-infowindow-at-a-time-google-maps
+    var breweryInfowindow = new google.maps.InfoWindow();
+
+    // For each brewery, set the markers and instantiate InfoWindows
+    self.breweryList().forEach(function(brewery) {
+
+        // Set the marker
+        marker = new google.maps.Marker({
+            position: new google.maps.LatLng(brewery.lat(), brewery.lng()),
+            map: map,
+            animation: google.maps.Animation.DROP
+        });
+        brewery.marker = marker;
+
+        // TODO: get info from API to populate inside the InfoWindow <div>
+
+
+        // Add infoWindow Content
+        google.maps.event.addListener(brewery.marker,'click',function(){
+            var infoWindowContent = '<div>' +
+            '<h4>' + brewery.name() + '</h4>' +
+            '<p>' + 'Future data points from Yelp and/or Foursquare' + '</p>' +
+            '<p><a target="_blank" href="https://www.google.com/maps/dir/Current+Location/' + brewery.lat() + ',' + brewery.lng() + '">Directions</a></p>' +
+            '</div>';
+            if (brewery.marker.getAnimation() !== null) {
+              brewery.marker.setAnimation(null);
+            } else {
+              brewery.marker.setAnimation(google.maps.Animation.BOUNCE);
+              // Using setTimeout stops the animation from running continually (and from being annoying)
+              setTimeout(function(){
+                brewery.marker.setAnimation(null);
+              }, 2800);
+            };
+            breweryInfowindow.setContent(infoWindowContent);
+            breweryInfowindow.open(map, brewery.marker);
+            map.panTo(brewery.marker.position);
+        });
+
+        // When a user clicks on an item from the sidebar or drop-down list, the marker is shown
+        self.showBreweryInfo = function(brewery) {
+            google.maps.event.trigger(brewery.marker, 'click');
+        };
+
+        self.visibleBreweries.push(brewery);
+
+    });
+
+    // Filter markers per user input
+    // Help: https://github.com/lacyjpr/neighborhood/
+    // Help: http://codepen.io/prather-mcs/pen/KpjbNN?editors=001
+
+    // Track user input, bind to search text boxes in DOM
+    self.userInput = ko.observable('');
+
+    self.filterBreweries = function () {
+
+        // Normalize all input to lowercase
+        var input = self.userInput().toLowerCase();
+
+        // Once the function is called, hide markers
+        self.visibleBreweries.removeAll();
+        self.breweryList().forEach(function (brewery) {
+            brewery.marker.setVisible(false);
+            if (brewery.name().toLowerCase().indexOf(input) !== -1) {
+                self.visibleBreweries.push(brewery);
+            }
+        });
+        self.visibleBreweries().forEach(function (brewery) {
+            brewery.marker.setVisible(true);
+        });
+    };
+
+
 };
 
-ko.applyBindings(new viewModel());
+var map;
+var centerLat = 39.566631;
+var centerLng = -104.872287;
+
+function initMap() {
+    "use strict";
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: new google.maps.LatLng(centerLat, centerLng),
+        zoom: 11,
+        disableDefaultUI: true
+    });
+    // Keep map centered on window resize
+    google.maps.event.addDomListener(window, 'resize', function() {
+        // The following resets to the pre-defined center centered in the map window
+        // map.setCenter(new google.maps.LatLng(centerLat, centerLng));
+        // map.panTo(new google.maps.LatLng(centerLat, centerLng));
+        // The following keeps the currently defined center centered in the map window
+        // Thanks to https://gist.github.com/toddmotto/5477991
+        var center = map.getCenter();
+        google.maps.event.trigger(map, 'resize');
+        map.setCenter(center);
+    });
+
+    ko.applyBindings(new viewModel());
+}
+
