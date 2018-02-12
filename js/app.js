@@ -122,81 +122,6 @@ var breweryPlaceData = [
     }
 ];
 
-// First pass on getting map elements to work.
-// TODO: Break up into MV* for use by Knockout
-// Initialize the map
-
-/*
-var map;
-var markers = [];
-var centerLat = 39.566631;
-var centerLng = -104.872287;
-
-function initMap() {
-    'use strict';
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: new google.maps.LatLng(centerLat, centerLng),
-        zoom: 11,
-        disableDefaultUI: true
-    });
-    // Keep map centered on window resize
-    google.maps.event.addDomListener(window, 'resize', function() {
-        // The following resets to the pre-defined center centered in the map window
-        // map.setCenter(new google.maps.LatLng(centerLat, centerLng));
-        // map.panTo(new google.maps.LatLng(centerLat, centerLng));
-        // The following keeps the currently defined center centered in the map window
-        // Thanks to https://gist.github.com/toddmotto/5477991
-        var center = map.getCenter();
-        google.maps.event.trigger(map, 'resize');
-        map.setCenter(center);
-    });
-
-
-    // Initialize the Google API's InfoWindow
-    var breweryInfowindow = new google.maps.InfoWindow();
-
-    for (var i = 0; i < breweryPlaceData.length; i++) {
-      var position = breweryPlaceData[i].location;
-      var title = breweryPlaceData[i].name;
-      var latitude = breweryPlaceData[i].location.lat;
-      var longitude = breweryPlaceData[i].location.lng;
-      var marker = new google.maps.Marker({
-        map: map,
-        position: position,
-        title: title,
-        lat: latitude,
-        lng: longitude,
-        animation: google.maps.Animation.DROP,
-      });
-      markers.push(marker);
-      marker.addListener('click', function() {
-        populateInfoWindow(this, breweryInfowindow);
-      });
-    };
-
-}
-
-// Function based upon
-function populateInfoWindow(marker, infowindow) {
-    // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-        // String together all data for info window display
-        var infoWindowContent = '<div>' +
-        '<h4>' + marker.title + '</h4>' +
-        '<p>' + 'Future data points from Yelp and/or Foursquare' + '</p>' +
-        '<p><a target="_blank" href="https://www.google.com/maps/dir/Current+Location/' + marker.lat + ',' + marker.lng + '">Directions</a></p>' +
-        '</div>';
-        infowindow.marker = marker;
-        infowindow.setContent(infoWindowContent);
-        infowindow.open(map, marker);
-        infowindow.addListener('closeclick',function(){
-            infowindow.setMarker = null;
-        });
-    }
-}
-
-*/
-
 /* ---------- Place Constructor ---------- */
 // Function to gather and bind data for each brewery
 var Place = function(data){
@@ -221,7 +146,7 @@ var viewModel = function () {
     self.breweryList = ko.observableArray([]);
 
     // Then, create another array for the ul list of breweries
-    // This will be used for filtering functions
+    // This will be used to display the full or filtered list based upon userInput
     self.visibleBreweries = ko.observableArray();
 
     // Next, create Place objects for all breweryPlaceData listed in the model
@@ -251,22 +176,34 @@ var viewModel = function () {
 
         // Add infoWindow Content
         google.maps.event.addListener(brewery.marker,'click',function(){
+
+            // Gather all of the infoWindow content into a variable
             var infoWindowContent = '<div>' +
             '<h4>' + brewery.name() + '</h4>' +
             '<p>' + 'Future data points from Yelp and/or Foursquare' + '</p>' +
             '<p><a target="_blank" href="https://www.google.com/maps/dir/Current+Location/' + brewery.lat() + ',' + brewery.lng() + '">Directions</a></p>' +
             '</div>';
+
+            // Only have the marker bounce animation triggered when a marker or name is clicked
+            // All others stop
             if (brewery.marker.getAnimation() !== null) {
               brewery.marker.setAnimation(null);
             } else {
               brewery.marker.setAnimation(google.maps.Animation.BOUNCE);
               // Using setTimeout stops the animation from running continually (and from being annoying)
+              // Help: https://discussions.udacity.com/t/how-to-stop-marker-animation-when-the-other-one-is-clicked/229309
               setTimeout(function(){
                 brewery.marker.setAnimation(null);
-              }, 2800);
+              }, 2100);
             };
+
+            // Set the content of the InfoWindow
             breweryInfowindow.setContent(infoWindowContent);
+
+            // Open the InfoWindow attached to the marker
             breweryInfowindow.open(map, brewery.marker);
+
+            // Move the map view to the marker
             map.panTo(brewery.marker.position);
         });
 
@@ -275,17 +212,21 @@ var viewModel = function () {
             google.maps.event.trigger(brewery.marker, 'click');
         };
 
+        // Add brewery information to the visibleBreweries observable array
+        // For use in filtering function below
         self.visibleBreweries.push(brewery);
 
     });
 
-    // Filter markers per user input
+    // Filter breweries based upon user input in either search field
     // Help: https://github.com/lacyjpr/neighborhood/
     // Help: http://codepen.io/prather-mcs/pen/KpjbNN?editors=001
 
-    // Track user input, bind to search text boxes in DOM
+    // Track user input by using the observable method
+    // Bind to search text boxes in DOM
     self.userInput = ko.observable('');
 
+    // Define the filter function
     self.filterBreweries = function () {
 
         // Normalize all input to lowercase
@@ -293,12 +234,15 @@ var viewModel = function () {
 
         // Once the function is called, hide markers
         self.visibleBreweries.removeAll();
+
+        // From the breweryList observable array, set visiblity
         self.breweryList().forEach(function (brewery) {
             brewery.marker.setVisible(false);
             if (brewery.name().toLowerCase().indexOf(input) !== -1) {
                 self.visibleBreweries.push(brewery);
             }
         });
+
         self.visibleBreweries().forEach(function (brewery) {
             brewery.marker.setVisible(true);
         });
@@ -307,29 +251,38 @@ var viewModel = function () {
 
 };
 
+/* ---------- View ---------- */
 var map;
+
+// Define the map center upon initial load (County Line Road/I-25)
 var centerLat = 39.566631;
 var centerLng = -104.872287;
 
+// Initialize the map
 function initMap() {
-    "use strict";
+    'use strict';
     map = new google.maps.Map(document.getElementById('map'), {
         center: new google.maps.LatLng(centerLat, centerLng),
         zoom: 11,
         disableDefaultUI: true
     });
+
     // Keep map centered on window resize
     google.maps.event.addDomListener(window, 'resize', function() {
-        // The following resets to the pre-defined center centered in the map window
-        // map.setCenter(new google.maps.LatLng(centerLat, centerLng));
-        // map.panTo(new google.maps.LatLng(centerLat, centerLng));
+
         // The following keeps the currently defined center centered in the map window
-        // Thanks to https://gist.github.com/toddmotto/5477991
+        // Help: https://gist.github.com/toddmotto/5477991
         var center = map.getCenter();
         google.maps.event.trigger(map, 'resize');
         map.setCenter(center);
+
+        // The following resets to the pre-defined center in the map window
+        // Not needed since clicking on a brewery name or marker pans to the marker using the panTo method in the VM above
+        /*
+        map.setCenter(new google.maps.LatLng(centerLat, centerLng));
+        map.panTo(new google.maps.LatLng(centerLat, centerLng));
+        */
     });
 
     ko.applyBindings(new viewModel());
-}
-
+};
