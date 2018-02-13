@@ -2,6 +2,11 @@
 // Initial array of breweries in the Denver/Metro area
 // TODO: replace this list with a dynamic list via BreweryDB API
 
+var foursquareCID = 'PEFOBDYIB3ZSYB2EZAIW2BMA0F14OZZCW214UESFUJD0JNUA';
+var foursquareSecret = 'RC30SNLRCCFXF3R0YDKW50HCHPRD3MK2S5K10H0HVTFSNC3O';
+var foursquareAPI = 'https://api.foursquare.com/v2/venues/search?client_id=' + foursquareCID +
+    '&client_secret=' + foursquareSecret;
+
 // Place Data
 // name = brewery name
 // lat = latitude
@@ -88,22 +93,22 @@ var breweryPlaceData = [
     {
         name: 'Blue Spruce Brewing Company',
         location: { lat: 39.566910, lng: -104.939904 },
-        type: 'BrewPub'
+        type: 'Brewpub'
     },
     {
         name: 'Rockyard American Grill and Brewing Company',
         location: { lat: 39.409238, lng: -104.869859 },
-        type: 'BrewPub'
+        type: 'Brewpub'
     },
     {
         name: 'Breckenridge Brewery Farm House',
         location: { lat: 39.593803, lng: -105.023768 },
-        type: 'BrewPub'
+        type: 'Brewpub'
     },
     {
         name: 'Dad & Dudes Breweria',
         location: { lat: 39.593947, lng: -104.806407 },
-        type: 'BrewPub'
+        type: 'Brewpub'
     },
     {
         name: 'Pints Pub Brewery and Freehouse',
@@ -119,7 +124,17 @@ var breweryPlaceData = [
         name: 'FanDraught Sports Brewery',
         location: { lat: 39.552105, lng: -104.773501 },
         type: 'Brewpub'
-    }
+    },
+    {
+        name: 'CB & Potts - Centennial',
+        location: { lat: 39.614068, lng: -104.896495 },
+        type: 'Brewpub'
+    },
+    {
+        name: 'CB & Potts - Highlands Ranch',
+        location: { lat: 39.564300, lng: -104.988136 },
+        type: 'Brewpub'
+    },
 ];
 
 /* ---------- Place Constructor ---------- */
@@ -216,6 +231,15 @@ var viewModel = function () {
         // For use in filtering function below
         self.visibleBreweries.push(brewery);
 
+        // Put data in alphabetical order by name.
+        self.visibleBreweries(self.visibleBreweries().sort(function (x, y) {
+            if (x.name < y.name) return -1;
+            if (x.name > y.name) return 1;
+            return 0;
+        }));
+
+        // Display an error message to the user if the map fails to load
+
     });
 
     // Filter breweries based upon user input in either search field
@@ -229,11 +253,14 @@ var viewModel = function () {
     // Define the filter function
     self.filterBreweries = function () {
 
-        // Normalize all input to lowercase
+        // Make case-independent by converting all input to lowercase
         var input = self.userInput().toLowerCase();
 
         // Once the function is called, hide markers
         self.visibleBreweries.removeAll();
+
+        // Close all open InfoWindows
+        breweryInfowindow.close();
 
         // From the breweryList observable array, set visiblity
         self.breweryList().forEach(function (brewery) {
@@ -248,6 +275,54 @@ var viewModel = function () {
         });
     };
 
+    self.clearForm = function(){
+
+        // Clear any text in the filter textboxes
+        document.getElementById('searchbox-sm-screen').value = "";
+        document.getElementById('searchbox-lg-screen').value = "";
+
+        // Remove all brewery data from the array
+        self.visibleBreweries.removeAll();
+
+        // Close all open InfoWindows
+        breweryInfowindow.close();
+
+        // Re-populate all markers and brewery names on the list
+        self.breweryList().forEach(function (brewery) {
+            brewery.marker.setVisible(true);
+            self.visibleBreweries.push(brewery);
+        });
+
+    };
+
+    self.toggleButton = function(type) {
+
+        // Once the function is called, hide markers
+        self.visibleBreweries.removeAll();
+
+        // Close all open InfoWindows
+        breweryInfowindow.close();
+
+        // Clear any text in the filter textboxes
+        document.getElementById('searchbox-sm-screen').value = "";
+        document.getElementById('searchbox-lg-screen').value = "";
+
+        // From the breweryList observable array, set visiblity
+        self.breweryList().forEach(function (brewery) {
+            brewery.marker.setVisible(false);
+            if (brewery.type() === type) {
+                self.visibleBreweries.push(brewery);
+            }
+            else if (type === 'All') {
+                self.visibleBreweries.push(brewery);
+            }
+        });
+
+        self.visibleBreweries().forEach(function (brewery) {
+            brewery.marker.setVisible(true);
+        });
+
+    };
 
 };
 
@@ -261,11 +336,16 @@ var centerLng = -104.872287;
 // Initialize the map
 function initMap() {
     'use strict';
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: new google.maps.LatLng(centerLat, centerLng),
-        zoom: 11,
-        disableDefaultUI: true
-    });
+    // Error handling for map load failure
+    try {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: new google.maps.LatLng(centerLat, centerLng),
+            zoom: 11,
+            disableDefaultUI: true
+        });
+    } catch (err) {
+        alert('Google Map load failure. Please check your internet connection!');
+    };
 
     // Keep map centered on window resize
     google.maps.event.addDomListener(window, 'resize', function() {

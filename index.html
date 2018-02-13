@@ -21,9 +21,9 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <a class="navbar-brand" href="#">Denver South Breweries/BrewPubs</a>
+      <a class="navbar-brand" href="#">Denver South Breweries</a>
       <form class="form-inline d-sm-block d-md-none my-sm-1 my-1 my-lg-0">
-          <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
+          <input id="searchbox-sm-screen" class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
         </form>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navCollapse" aria-controls="navCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -37,18 +37,14 @@
             </div>
           </li>
           <li class="nav-item">
-            <a class="btn btn-primary btn-sm my-sm-1 my-1" href="#">View Taprooms Only</a>
+            <a class="btn btn-primary btn-sm my-sm-1 my-1" href="#" data-bind="click: toggleButton.bind($data,'Taproom')">Taprooms Only</a>
           </li>
           <li class="nav-item">
-            <a class="btn btn-info btn-sm my-sm-1 my-1" href="#">View Brewpubs Only</a>
+            <a class="btn btn-info btn-sm my-sm-1 my-1" href="#" data-bind="click: toggleButton.bind($data,'Brewpub')">Brewpubs Only</a>
           </li>
           <li class="nav-item">
-            <a class="btn btn-warning btn-sm my-sm-1 my-1" href="#">View All</a>
+            <a class="btn btn-success btn-sm my-sm-1 my-1" href="#" data-bind="click: toggleButton.bind($data,'All')">View All</a>
           </li>
-          <li class="nav-item">
-            <a class="btn btn-danger btn-sm my-sm-1 my-1" href="#">View None</a>
-          </li>
-
         </ul>
       </div>
     </nav>
@@ -58,8 +54,9 @@
           <div class="card border-secondary mt-3 d-none d-md-block">
             <div class="card-header bg-secondary text-light"><strong>On This Map...</strong></div>
             <div class="card-body bg-light">
-              <form class="form my-2 my-lg-0">
-                <input class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
+              <form class="form-inline my-2 my-lg-0">
+                <input id="searchbox-lg-screen" class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
+                <button type="reset" class="btn btn-sm btn-danger mb-2" data-bind="click: clearForm">Clear Filter</button>
               </form>
               <ul class="list-unstyled" data-bind="foreach: visibleBreweries">
                 <li class="small"><a href="#" data-bind="text: name, click: $parent.showBreweryInfo"></a></li>
@@ -72,11 +69,10 @@
         </div>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
     <script src="js/app.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKeH6OCP82sNs5S2Hn1kI4Xg1uXUkbZPU&callback=initMap" async defer></script>
   </body>
