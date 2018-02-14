@@ -16,7 +16,7 @@ var version = yyyy + mm + dd;
 
 // Foursquare vars
 var foursquareCID = 'PEFOBDYIB3ZSYB2EZAIW2BMA0F14OZZCW214UESFUJD0JNUA';
-var foursquareSecret = 'RC30SNLRCCFXF3R0YDKW50HCHPRD3MK2S5K10H0HVTFSNC3O';
+var foursquareSecret = '3UJHPJIXQ04JLHBQLN0MORHTUDDSRSKAN2LU0VV4J3SL2XV2';
 var foursquareAPI = 'https://api.foursquare.com/v2/venues/search?client_id=' + foursquareCID +
     '&client_secret=' + foursquareSecret + '&v=' + version;
 
@@ -24,15 +24,15 @@ var foursquareAPI = 'https://api.foursquare.com/v2/venues/search?client_id=' + f
 var googleMapsAPIKey = 'AIzaSyBKeH6OCP82sNs5S2Hn1kI4Xg1uXUkbZPU';
 var googleStreetViewURL = 'https://maps.googleapis.com/maps/api/streetview';
 
-// Initial array of breweries in the Denver/Metro area
-// TODO: replace this list with a dynamic list via BreweryDB API or UnTappd
-// Place Data
-// name = brewery name
-// lat = latitude
-// lng = longitude
-// id = google place id
-// type = type of establishment (taproom [only serves their brews], brewpub [serves their brews and food])
-
+/* Initial array of breweries in the Denver/Metro area south of I70
+ * TODO: replace this list with a dynamic list via BreweryDB API or UnTappd API
+ * TODO: constrain results to visible map bounds
+ * Place Data
+ * name = brewery name
+ * lat = latitude
+ * lng = longitude
+ * type = type of establishment (taproom [only serves their brews], brewpub [serves their brews and food])
+ */
 var breweryPlaceData = [
     {
         name: 'Dry Dock Brewing Company - South Dock',
@@ -171,12 +171,6 @@ var Place = function(data){
     this.marker = ko.observable();
 };
 
-var FourSquareConst = function(data){
-    this.clientID = ko.observable(data.clientID);
-    this.clientSecret = ko.observable(data.clientSecret);
-    this.apiURL = ko.observable(data.apiURL);
-};
-
 /* ---------- View Model ---------- */
 var viewModel = function () {
 
@@ -196,10 +190,11 @@ var viewModel = function () {
         self.breweryList.push( new Place(brewery) );
     });
 
-    // Initialize the infoWindow
-    // Declaring a single instance of it OUTSIDE of the loop below
-    // This results in only one InfoWindow open at a time in the DOM
-    // Help: https://stackoverflow.com/questions/24951991/open-only-one-infowindow-at-a-time-google-maps
+    /* Initialize the infoWindow
+     * Declaring a single instance of it OUTSIDE of the loop below
+     * This results in only one InfoWindow open at a time in the DOM
+     * Help: https://stackoverflow.com/questions/24951991/open-only-one-infowindow-at-a-time-google-maps
+     */
     var breweryInfowindow = new google.maps.InfoWindow();
 
     // For each brewery, set the markers and instantiate InfoWindows
@@ -236,6 +231,9 @@ var viewModel = function () {
             var breweryInfo = response.response.venues[0];
 
             // Setup vars for brevity and sanity
+            var breweryInfoAddress = '';
+            var brewerySocialSeperator = '';
+            var foursquareSuccess = false;
             var breweryInfoStreet = breweryInfo.location.address;
             var breweryInfoCity = breweryInfo.location.city;
             var breweryInfoState = breweryInfo.location.state;
@@ -447,11 +445,12 @@ var viewModel = function () {
         document.getElementById('searchbox-lg-screen').value = "";
     };
 
-    // Filter breweries based upon user input in either search field
-    // Help: https://github.com/lacyjpr/neighborhood/
-    // Help: http://codepen.io/prather-mcs/pen/KpjbNN?editors=001
-    // Track user input by using the observable method
-    // Bind to search text boxes in DOM
+    /* Filter breweries based upon user input in either search field
+     * Help: https://github.com/lacyjpr/neighborhood/
+     * Help: http://codepen.io/prather-mcs/pen/KpjbNN?editors=001
+     * Track user input by using the observable method
+     * Bind to search text boxes in DOM
+     */
     self.userInput = ko.observable('');
 
     // Define the filter function
