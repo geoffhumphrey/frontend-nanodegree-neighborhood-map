@@ -1,0 +1,13 @@
+html, body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  height: 100vh;
+}
+
+.btn {
+  margin: 0 5px 0 5px;
+}

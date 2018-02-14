@@ -1,23 +1,47 @@
 // ---------- Model -------------
-// Initial array of breweries in the Denver/Metro area
-// TODO: replace this list with a dynamic list via BreweryDB API
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth()+1;
+var yyyy = today.getFullYear();
 
+if (dd < 10) {
+    dd = '0' + dd;
+}
+
+if (mm<10) {
+    mm = '0' + mm;
+}
+
+var version = yyyy + mm + dd;
+
+// Foursquare vars
 var foursquareCID = 'PEFOBDYIB3ZSYB2EZAIW2BMA0F14OZZCW214UESFUJD0JNUA';
 var foursquareSecret = 'RC30SNLRCCFXF3R0YDKW50HCHPRD3MK2S5K10H0HVTFSNC3O';
 var foursquareAPI = 'https://api.foursquare.com/v2/venues/search?client_id=' + foursquareCID +
-    '&client_secret=' + foursquareSecret;
+    '&client_secret=' + foursquareSecret + '&v=' + version;
 
+// Google map and street view vars
+var googleMapsAPIKey = 'AIzaSyBKeH6OCP82sNs5S2Hn1kI4Xg1uXUkbZPU';
+var googleStreetViewURL = 'https://maps.googleapis.com/maps/api/streetview';
+
+// Initial array of breweries in the Denver/Metro area
+// TODO: replace this list with a dynamic list via BreweryDB API or UnTappd
 // Place Data
 // name = brewery name
 // lat = latitude
 // lng = longitude
 // id = google place id
-// type = type of establishment (taproom, brewpub [serves food], taphouse [serves beers from other breweries])
+// type = type of establishment (taproom [only serves their brews], brewpub [serves their brews and food])
 
 var breweryPlaceData = [
     {
         name: 'Dry Dock Brewing Company - South Dock',
         location: { lat: 39.652665, lng: -104.812040 },
+        type: 'Taproom'
+    },
+    {
+        name: 'Dry Dock Brewing Company - North Dock',
+        location: { lat: 39.756624, lng: -104.773515 },
         type: 'Taproom'
     },
     {
@@ -33,7 +57,7 @@ var breweryPlaceData = [
     {
         name: 'Peak to Peak Tap & Brew',
         location: { lat: 39.674087, lng: -104.793862 },
-        type: [ 'Taproom' , 'Brewpub', 'Taphouse' ]
+        type: 'Brewpub'
     },
     {
         name: 'Declaration Brewing Company',
@@ -126,13 +150,13 @@ var breweryPlaceData = [
         type: 'Brewpub'
     },
     {
-        name: 'CB & Potts - Centennial',
-        location: { lat: 39.614068, lng: -104.896495 },
+        name: 'CB & Potts - Greenwood Village',
+        location: { lat: 39.597370, lng: -104.8895760 },
         type: 'Brewpub'
     },
     {
         name: 'CB & Potts - Highlands Ranch',
-        location: { lat: 39.564300, lng: -104.988136 },
+        location: { lat: 39.562739, lng: -104.988435 },
         type: 'Brewpub'
     },
 ];
@@ -144,10 +168,13 @@ var Place = function(data){
     this.lat = ko.observable(data.location.lat);
     this.lng = ko.observable(data.location.lng);
     this.type = ko.observable(data.type);
-    // Gotta get the marker
     this.marker = ko.observable();
-    // Add other data points as investigation in to
-    // UnTappd API continues
+};
+
+var FourSquareConst = function(data){
+    this.clientID = ko.observable(data.clientID);
+    this.clientSecret = ko.observable(data.clientSecret);
+    this.apiURL = ko.observable(data.apiURL);
 };
 
 /* ---------- View Model ---------- */
@@ -184,18 +211,170 @@ var viewModel = function () {
             map: map,
             animation: google.maps.Animation.DROP
         });
+
         brewery.marker = marker;
 
-        // TODO: get info from API to populate inside the InfoWindow <div>
+        // Construct the Foursquare API URL
+        var foursquareURL =  foursquareAPI +
+            '&ll=' + brewery.lat() + ',' + brewery.lng() +
+            '&query=\'' + encodeURIComponent(brewery.name()) + '\'' +
+            '&limit=1';
 
+        // console.log(foursquareURL);
+
+        // Declare the Foursquare display var
+        var foursquareRespDisplay = '';
+        var googleStreetViewImage = '';
+
+        // Help: http://api.jquery.com/jquery.getjson/
+        $.getJSON( foursquareURL, function(response) {
+
+            console.log('Success: '+ brewery.name());
+
+            // Simplify the response var for sanity's sake
+            // Only take the first returned response
+            var breweryInfo = response.response.venues[0];
+
+            // Setup vars for brevity and sanity
+            var breweryInfoStreet = breweryInfo.location.address;
+            var breweryInfoCity = breweryInfo.location.city;
+            var breweryInfoState = breweryInfo.location.state;
+            var breweryInfoZip = breweryInfo.location.postalCode;
+            var breweryInfoPhone = breweryInfo.contact.formattedPhone;
+            var breweryInfoFacebook = breweryInfo.contact.facebookUsername;
+            var breweryInfoTwitter = breweryInfo.contact.twitter;
+            var breweryInfoLat = breweryInfo.location.lat;
+            var breweryInfoLng = breweryInfo.location.lng;
+
+            // Fallback to prescribed lat and long if not available via Foursquare
+            if (breweryInfoLat === undefined) {
+                breweryInfoLat = brewery.lat();
+            }
+
+            if (breweryInfoLng === undefined) {
+                breweryInfoLng = brewery.lng();
+            }
+
+            // Check Google Street View metadata status for lat/lng combo
+            // Establish Street View vars
+            var googleStreetView = '';
+
+            // Build metadata URL
+            var googleStreetViewMetadataURL = googleStreetViewURL + '/metadata?location=' + breweryInfoLat + ',' + breweryInfoLng +
+            '&size=300x200&key=' + googleMapsAPIKey;
+            console.log(googleStreetViewMetadataURL);
+
+            // Get Google Street View metadata JSON and check the status
+            $.getJSON(googleStreetViewMetadataURL, function(response) {
+
+                var googleStreetViewMetaStatus = response.status;
+
+                console.log('Metadata Success: '.brewery.name());
+                console.log(googleStreetViewMetaStatus);
+
+                // If the status is OK, flag the street view image as good for display
+                if (googleStreetViewMetaStatus == 'OK') {
+                    googleStreetView = true;
+                }
+
+                // All other statuses flag the street view image as NOT good for display
+                else {
+                    googleStreetView = false;
+                }
+
+            })
+
+            // Error handling
+            .done(function() {
+                console.log('Second Metadata Success: '+ brewery.name());
+            })
+
+            .fail(function() {
+                console.log('Metadata Error: '+ brewery.name());
+                googleStreetView = false;
+            })
+
+            .always(function() {
+                console.log('Metadata Complete: '+ brewery.name());
+            });
+
+            // If image found, generate image tag with properly formed URL
+            if (googleStreetView) {
+                googleStreetViewImage = '<p><img src="' + googleStreetViewURL + '?' +
+                'location=' + breweryInfoLat + ',' + breweryInfoLng +
+                '&size=300x200&key=' + googleMapsAPIKey + '"></p>';
+                console.log(googleStreetViewImage);
+            }
+
+            // Only display complete addresses, otherwise display "incomplete" message
+            if ((breweryInfoStreet !== undefined) && (breweryInfoCity !== undefined) && (breweryInfoState !== undefined) && (breweryInfoZip !== undefined)) {
+                breweryInfoAddress = breweryInfoStreet + '<br>' + breweryInfoCity + ', ' + breweryInfoState + ' ' + breweryInfoZip;
+            }
+            else {
+                breweryInfoAddress = 'The address for this brewery was incomplete or not found.';
+            }
+
+            // Error handle phone number
+            if (breweryInfoPhone === undefined) {
+                breweryInfoPhone = 'A phone number for this brewery was not found.';
+            }
+
+            // Show Facebook icon and link to Facebook page if username is present in profile
+            if (breweryInfoFacebook !== undefined) {
+                breweryInfoFacebook = ' <a href="https://www.facebook.com/' + breweryInfoFacebook +'" target="_blank" title="Facebook"><span class="fab fa-facebook"></span></a>';
+            }
+            else {
+                 breweryInfoFacebook = '';
+            }
+
+            // Show Twitter icon and link to Facebook page if username is present in profile
+            if (breweryInfoTwitter !== undefined) {
+                breweryInfoTwitter = ' <a href="https://www.twitter.com/' + breweryInfoTwitter +'" target="_blank" title="Twitter"><span class="fab fa-twitter"></span></a>';
+            }
+            else {
+                 breweryInfoTwitter = '';
+            }
+
+            // Help make the display of social icons look pretty
+            if ((breweryInfoFacebook !== undefined) || (breweryInfoTwitter !== undefined)) {
+                brewerySocialSeperator = '</p><p>';
+            }
+            else {
+                brewerySocialSeperator = '';
+            }
+
+            // Concat info to be displayed
+            foursquareRespDisplay = '<p>' + breweryInfoAddress + '<br>' + breweryInfoPhone + brewerySocialSeperator + breweryInfoFacebook + breweryInfoTwitter + '</p>';
+            foursquareSuccess = true;
+        })
+
+        .done(function() {
+            console.log('Second Success: '+ brewery.name());
+        })
+
+        .fail(function() {
+            console.log('Error: '+ brewery.name());
+            foursquareRespDisplay = '<p>Data could not be retrieved from Foursquare.</p>';
+            foursquareSuccess = false;
+        })
+
+        .always(function() {
+            console.log('Complete: '+ brewery.name());
+        });
 
         // Add infoWindow Content
         google.maps.event.addListener(brewery.marker,'click',function(){
 
+            if (foursquareSuccess) {
+                foursquareRespDisplay = foursquareRespDisplay + '<p><small><em>Address, phone number and other data provided by <a href="https://foursquare.com" target="_blank">Foursquare</a>.</p>';
+            }
+
             // Gather all of the infoWindow content into a variable
             var infoWindowContent = '<div>' +
             '<h4>' + brewery.name() + '</h4>' +
-            '<p>' + 'Future data points from Yelp and/or Foursquare' + '</p>' +
+            '<h6>' + brewery.type() + '</h6>' +
+            foursquareRespDisplay +
+            googleStreetViewImage +
             '<p><a target="_blank" href="https://www.google.com/maps/dir/Current+Location/' + brewery.lat() + ',' + brewery.lng() + '">Directions</a></p>' +
             '</div>';
 
@@ -210,7 +389,7 @@ var viewModel = function () {
               setTimeout(function(){
                 brewery.marker.setAnimation(null);
               }, 2100);
-            };
+            }
 
             // Set the content of the InfoWindow
             breweryInfowindow.setContent(infoWindowContent);
@@ -231,21 +410,26 @@ var viewModel = function () {
         // For use in filtering function below
         self.visibleBreweries.push(brewery);
 
-        // Put data in alphabetical order by name.
-        self.visibleBreweries(self.visibleBreweries().sort(function (x, y) {
-            if (x.name < y.name) return -1;
-            if (x.name > y.name) return 1;
-            return 0;
-        }));
-
         // Display an error message to the user if the map fails to load
 
     });
 
+    // Put data in alphabetical order by name.
+    // TODO: Not exactly sure why this isn't working
+    self.visibleBreweries(self.visibleBreweries().sort(function (x, y) {
+        if (x.name < y.name) return -1;
+        if (x.name > y.name) return 1;
+        return 0;
+    }));
+
+    self.clearSearchboxes = function () {
+        document.getElementById('searchbox-sm-screen').value = "";
+        document.getElementById('searchbox-lg-screen').value = "";
+    };
+
     // Filter breweries based upon user input in either search field
     // Help: https://github.com/lacyjpr/neighborhood/
     // Help: http://codepen.io/prather-mcs/pen/KpjbNN?editors=001
-
     // Track user input by using the observable method
     // Bind to search text boxes in DOM
     self.userInput = ko.observable('');
@@ -256,13 +440,13 @@ var viewModel = function () {
         // Make case-independent by converting all input to lowercase
         var input = self.userInput().toLowerCase();
 
-        // Once the function is called, hide markers
+        // Once the function is instantiated, hide all markers
         self.visibleBreweries.removeAll();
 
         // Close all open InfoWindows
         breweryInfowindow.close();
 
-        // From the breweryList observable array, set visiblity
+        // From the breweryList observable array, add to visibleBreweries array
         self.breweryList().forEach(function (brewery) {
             brewery.marker.setVisible(false);
             if (brewery.name().toLowerCase().indexOf(input) !== -1) {
@@ -270,22 +454,30 @@ var viewModel = function () {
             }
         });
 
+        // Set visibility of all in visibleBreweries array
         self.visibleBreweries().forEach(function (brewery) {
             brewery.marker.setVisible(true);
         });
     };
 
+    // Function to clear the searchboxes and any infoWindows, resetting to default display
     self.clearForm = function(){
 
         // Clear any text in the filter textboxes
-        document.getElementById('searchbox-sm-screen').value = "";
-        document.getElementById('searchbox-lg-screen').value = "";
+        self.clearSearchboxes();
 
         // Remove all brewery data from the array
         self.visibleBreweries.removeAll();
 
         // Close all open InfoWindows
         breweryInfowindow.close();
+
+        // Put data in alphabetical order by name.
+        self.visibleBreweries(self.visibleBreweries().sort(function (x, y) {
+            if (x.name < y.name) return -1;
+            if (x.name > y.name) return 1;
+            return 0;
+        }));
 
         // Re-populate all markers and brewery names on the list
         self.breweryList().forEach(function (brewery) {
@@ -295,6 +487,7 @@ var viewModel = function () {
 
     };
 
+    // Function to toggle views for Taproom Only and Brewpubs Only buttons
     self.toggleButton = function(type) {
 
         // Once the function is called, hide markers
@@ -304,10 +497,9 @@ var viewModel = function () {
         breweryInfowindow.close();
 
         // Clear any text in the filter textboxes
-        document.getElementById('searchbox-sm-screen').value = "";
-        document.getElementById('searchbox-lg-screen').value = "";
+        self.clearSearchboxes();
 
-        // From the breweryList observable array, set visiblity
+        // From the breweryList observable array, add to visibleBreweries array
         self.breweryList().forEach(function (brewery) {
             brewery.marker.setVisible(false);
             if (brewery.type() === type) {
@@ -318,6 +510,7 @@ var viewModel = function () {
             }
         });
 
+        // Set visibility of all in visibleBreweries array
         self.visibleBreweries().forEach(function (brewery) {
             brewery.marker.setVisible(true);
         });
@@ -345,7 +538,7 @@ function initMap() {
         });
     } catch (err) {
         alert('Google Map load failure. Please check your internet connection!');
-    };
+    }
 
     // Keep map centered on window resize
     google.maps.event.addDomListener(window, 'resize', function() {
@@ -365,4 +558,4 @@ function initMap() {
     });
 
     ko.applyBindings(new viewModel());
-};
+}

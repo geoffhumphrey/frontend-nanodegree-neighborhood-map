@@ -4,34 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <title>Denver South Breweries/BrewPubs</title>
-    <style>
-      #map {
-        height: 100vh;
-      }
-      html, body {
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-      }
-      .btn {
-        margin: 0 5px 0 5px;
-      }
-    </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <a class="navbar-brand" href="#">Denver South Breweries</a>
+    <nav class="navbar navbar-expand-md navbar-light bg-secondary">
+      <a class="navbar-brand text-white" href="#">Denver South Breweries</a>
       <form class="form-inline d-sm-block d-md-none my-sm-1 my-1 my-lg-0">
           <input id="searchbox-sm-screen" class="form-control form-control-sm mb-2 mr-sm-2" type="text" placeholder="Search for a Brewery" aria-label="Search" data-bind="textInput: userInput, event: { keyup: filterBreweries }">
+          <button type="reset" class="btn btn-sm btn-danger mb-2" data-bind="click: clearForm">Clear Filter</button>
         </form>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navCollapse" aria-controls="navCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navCollapse" aria-controls="navCollapse" aria-expanded="false" aria-label="Toggle Nav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navCollapse">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item dropdown d-sm-block d-md-none">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose a Brewery</a>
+            <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose a Brewery</a>
             <div id="brewery-list" class="dropdown-menu" aria-labelledby="dropdown01" data-bind="foreach: visibleBreweries">
               <a class="dropdown-item small" href="#" data-bind="text: name, click: $parent.showBreweryInfo"></a>
             </div>
@@ -69,7 +59,7 @@
         </div>
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
