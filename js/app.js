@@ -243,6 +243,7 @@ var viewModel = function () {
             var breweryInfoPhone = breweryInfo.contact.formattedPhone;
             var breweryInfoFacebook = breweryInfo.contact.facebookUsername;
             var breweryInfoTwitter = breweryInfo.contact.twitter;
+            var breweryInfoURL = breweryInfo.url;
             var breweryInfoLat = breweryInfo.location.lat;
             var breweryInfoLng = breweryInfo.location.lng;
 
@@ -255,13 +256,72 @@ var viewModel = function () {
                 breweryInfoLng = brewery.lng();
             }
 
+            // Only display complete addresses, otherwise display "incomplete" message
+            if ((breweryInfoStreet !== undefined) && (breweryInfoCity !== undefined) && (breweryInfoState !== undefined) && (breweryInfoZip !== undefined)) {
+                breweryInfoAddress = breweryInfoStreet + '<br>' + breweryInfoCity + ', ' + breweryInfoState + ' ' + breweryInfoZip;
+            }
+            else {
+                breweryInfoAddress = 'The address for this brewery was incomplete or not found.';
+            }
+
+            // Error handle phone number
+            if (breweryInfoPhone === undefined) {
+                breweryInfoPhone = 'A phone number for this brewery was not found.';
+            }
+
+            // Show Facebook icon and link to Facebook page if username is present in profile
+            if (breweryInfoFacebook !== undefined) {
+                breweryInfoFacebook = ' <a href="https://www.facebook.com/' +
+                    breweryInfoFacebook +
+                    '" target="_blank" title="Facebook"><span class="fab fa-facebook mr-2"></span></a>';
+            }
+            else {
+                 breweryInfoFacebook = '';
+            }
+
+            // Show Twitter icon and link to Facebook page if username is present in profile
+            if (breweryInfoTwitter !== undefined) {
+                breweryInfoTwitter = ' <a href="https://www.twitter.com/' +
+                    breweryInfoTwitter +
+                    '" target="_blank" title="Twitter"><span class="fab fa-twitter mr-2"></span></a>';
+            }
+            else {
+                 breweryInfoTwitter = '';
+            }
+
+            // Show website icon and link to website if URL is present in profile
+            if (breweryInfoURL !== undefined) {
+                breweryInfoURL = ' <a href="' +
+                    breweryInfoURL +
+                    '" target="_blank" title="Website"><span class="fab fa-link"></span></a>';
+            }
+            else {
+                 breweryInfoURL = '';
+            }
+
+            // Help make the display of social icons look pretty
+            if ((breweryInfoFacebook !== undefined) || (breweryInfoTwitter !== undefined) || (breweryInfoURL !== undefined)) {
+                brewerySocialSeperator = '</p><p>';
+            }
+            else {
+                brewerySocialSeperator = '';
+            }
+
+            // Concat info to be displayed
+            foursquareRespDisplay = '<p>' + breweryInfoAddress + '<br>' +
+                breweryInfoPhone + brewerySocialSeperator + breweryInfoFacebook +
+                breweryInfoTwitter + breweryInfoURL + '</p>';
+            foursquareSuccess = true;
+
             // Check Google Street View metadata status for lat/lng combo
             // Establish Street View vars
             var googleStreetView = '';
 
             // Build metadata URL
-            var googleStreetViewMetadataURL = googleStreetViewURL + '/metadata?location=' + breweryInfoLat + ',' + breweryInfoLng +
-            '&size=300x200&key=' + googleMapsAPIKey;
+            var googleStreetViewMetadataURL = googleStreetViewURL + '/metadata?location=' +
+                breweryInfoLat + ',' + breweryInfoLng +
+                '&size=300x200&key=' + googleMapsAPIKey;
+
             console.log(googleStreetViewMetadataURL);
 
             // Get Google Street View metadata JSON and check the status
@@ -306,46 +366,6 @@ var viewModel = function () {
                 console.log(googleStreetViewImage);
             }
 
-            // Only display complete addresses, otherwise display "incomplete" message
-            if ((breweryInfoStreet !== undefined) && (breweryInfoCity !== undefined) && (breweryInfoState !== undefined) && (breweryInfoZip !== undefined)) {
-                breweryInfoAddress = breweryInfoStreet + '<br>' + breweryInfoCity + ', ' + breweryInfoState + ' ' + breweryInfoZip;
-            }
-            else {
-                breweryInfoAddress = 'The address for this brewery was incomplete or not found.';
-            }
-
-            // Error handle phone number
-            if (breweryInfoPhone === undefined) {
-                breweryInfoPhone = 'A phone number for this brewery was not found.';
-            }
-
-            // Show Facebook icon and link to Facebook page if username is present in profile
-            if (breweryInfoFacebook !== undefined) {
-                breweryInfoFacebook = ' <a href="https://www.facebook.com/' + breweryInfoFacebook +'" target="_blank" title="Facebook"><span class="fab fa-facebook"></span></a>';
-            }
-            else {
-                 breweryInfoFacebook = '';
-            }
-
-            // Show Twitter icon and link to Facebook page if username is present in profile
-            if (breweryInfoTwitter !== undefined) {
-                breweryInfoTwitter = ' <a href="https://www.twitter.com/' + breweryInfoTwitter +'" target="_blank" title="Twitter"><span class="fab fa-twitter"></span></a>';
-            }
-            else {
-                 breweryInfoTwitter = '';
-            }
-
-            // Help make the display of social icons look pretty
-            if ((breweryInfoFacebook !== undefined) || (breweryInfoTwitter !== undefined)) {
-                brewerySocialSeperator = '</p><p>';
-            }
-            else {
-                brewerySocialSeperator = '';
-            }
-
-            // Concat info to be displayed
-            foursquareRespDisplay = '<p>' + breweryInfoAddress + '<br>' + breweryInfoPhone + brewerySocialSeperator + breweryInfoFacebook + breweryInfoTwitter + '</p>';
-            foursquareSuccess = true;
         })
 
         .done(function() {
