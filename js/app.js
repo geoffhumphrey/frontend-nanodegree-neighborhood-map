@@ -24,6 +24,11 @@ var foursquareAPI = 'https://api.foursquare.com/v2/venues/search?client_id=' + f
 var googleMapsAPIKey = 'AIzaSyBKeH6OCP82sNs5S2Hn1kI4Xg1uXUkbZPU';
 var googleStreetViewURL = 'https://maps.googleapis.com/maps/api/streetview';
 
+// Define the map and the map center upon initial load (County Line Road/I-25)
+var map;
+var centerLat = 39.566631;
+var centerLng = -104.872287;
+
 /* Initial array of breweries in the Denver/Metro area south of I70
  * TODO: replace this list with a dynamic list via BreweryDB API or UnTappd API
  * TODO: constrain results to visible map bounds
@@ -195,7 +200,9 @@ var viewModel = function () {
      * This results in only one InfoWindow open at a time in the DOM
      * Help: https://stackoverflow.com/questions/24951991/open-only-one-infowindow-at-a-time-google-maps
      */
-    var breweryInfowindow = new google.maps.InfoWindow();
+    var breweryInfowindow = new google.maps.InfoWindow({
+        maxWidth: 300
+    });
 
     // For each brewery, set the markers and instantiate InfoWindows
     self.breweryList().forEach(function(brewery) {
@@ -220,11 +227,14 @@ var viewModel = function () {
         // Declare the Foursquare display var
         var foursquareRespDisplay = '';
         var googleStreetViewImage = '';
+        var foursquareSuccess = false;
+        var drivingDirections = '<a href="https://www.google.com/maps/dir/Current+Location/' +
+            brewery.lat() + ',' + brewery.lng() +
+            '" target="_blank" title="Driving Directions"><span class="fas fa-car"></span></a>';
+        var foursquareCredit = '';
 
         // Help: http://api.jquery.com/jquery.getjson/
         $.getJSON( foursquareURL, function(response) {
-
-            console.log('Success: '+ brewery.name());
 
             // Simplify the response var for sanity's sake
             // Only take the first returned response
@@ -233,17 +243,27 @@ var viewModel = function () {
             // Setup vars for brevity and sanity
             var breweryInfoAddress = '';
             var brewerySocialSeperator = '';
-            var foursquareSuccess = false;
-            var breweryInfoStreet = breweryInfo.location.address;
-            var breweryInfoCity = breweryInfo.location.city;
-            var breweryInfoState = breweryInfo.location.state;
-            var breweryInfoZip = breweryInfo.location.postalCode;
-            var breweryInfoPhone = breweryInfo.contact.formattedPhone;
-            var breweryInfoFacebook = breweryInfo.contact.facebookUsername;
-            var breweryInfoTwitter = breweryInfo.contact.twitter;
-            var breweryInfoURL = breweryInfo.url;
-            var breweryInfoLat = breweryInfo.location.lat;
-            var breweryInfoLng = breweryInfo.location.lng;
+            var breweryInfoStreet = '';
+            var breweryInfoCity = '';
+            var breweryInfoState = '';
+            var breweryInfoZip = '';
+            var breweryInfoPhone = '';
+            var breweryInfoFacebook = '';
+            var breweryInfoTwitter = '';
+            var breweryInfoURL = '';
+            var breweryInfoLat = '';
+            var breweryInfoLng = '';
+
+            breweryInfoStreet = breweryInfo.location.address;
+            breweryInfoCity = breweryInfo.location.city;
+            breweryInfoState = breweryInfo.location.state;
+            breweryInfoZip = breweryInfo.location.postalCode;
+            breweryInfoPhone = breweryInfo.contact.formattedPhone;
+            breweryInfoFacebook = breweryInfo.contact.facebookUsername;
+            breweryInfoTwitter = breweryInfo.contact.twitter;
+            breweryInfoURL = breweryInfo.url;
+            breweryInfoLat = breweryInfo.location.lat;
+            breweryInfoLng = breweryInfo.location.lng;
 
             // Fallback to prescribed lat and long if not available via Foursquare
             if (breweryInfoLat === undefined) {
@@ -291,7 +311,7 @@ var viewModel = function () {
             if (breweryInfoURL !== undefined) {
                 breweryInfoURL = ' <a href="' +
                     breweryInfoURL +
-                    '" target="_blank" title="Website"><span class="fab fa-link"></span></a>';
+                    '" target="_blank" title="Website"><span class="fas fa-link mr-2"></span></a>';
             }
             else {
                  breweryInfoURL = '';
@@ -308,17 +328,12 @@ var viewModel = function () {
             // Concat info to be displayed
             foursquareRespDisplay = '<p>' + breweryInfoAddress + '<br>' +
                 breweryInfoPhone + brewerySocialSeperator + breweryInfoFacebook +
-                breweryInfoTwitter + breweryInfoURL + '</p>';
-            foursquareSuccess = true;
+                breweryInfoTwitter + breweryInfoURL + drivingDirections + '</p>';
 
             // Check Google Street View metadata status for lat/lng combo
-            // Establish Street View vars
-            var googleStreetView = '';
-
             // Build metadata URL
             var googleStreetViewMetadataURL = googleStreetViewURL + '/metadata?location=' +
-                breweryInfoLat + ',' + breweryInfoLng +
-                '&size=300x200&key=' + googleMapsAPIKey;
+                breweryInfoLat + ',' + breweryInfoLng + '&key=' + googleMapsAPIKey;
 
             console.log(googleStreetViewMetadataURL);
 
@@ -327,19 +342,19 @@ var viewModel = function () {
 
                 var googleStreetViewMetaStatus = response.status;
 
-                console.log('Metadata Success: '.brewery.name());
+                //console.log('Metadata Success: '.brewery.name());
                 console.log(googleStreetViewMetaStatus);
 
                 // If the status is OK, flag the street view image as good for display
-                if (googleStreetViewMetaStatus == 'OK') {
-                    googleStreetView = true;
+                if (googleStreetViewMetaStatus === 'OK') {
+                    googleStreetViewImage = '<p><img src="' + googleStreetViewURL + '?' +
+                        'location=' + breweryInfoLat + ',' + breweryInfoLng +
+                        '&size=275x150&key=' + googleMapsAPIKey + '"></p>';
+                        console.log(googleStreetViewImage);
                 }
 
-                // All other statuses flag the street view image as NOT good for display
-                else {
-                    googleStreetView = false;
-                }
-
+                foursquareSuccess = true;
+                console.log('Success: '+ brewery.name());
             })
 
             // Error handling
@@ -349,20 +364,12 @@ var viewModel = function () {
 
             .fail(function() {
                 console.log('Metadata Error: '+ brewery.name());
-                googleStreetView = false;
+                foursquareSuccess = false;
             })
 
             .always(function() {
                 console.log('Metadata Complete: '+ brewery.name());
             });
-
-            // If image found, generate image tag with properly formed URL
-            if (googleStreetView) {
-                googleStreetViewImage = '<p><img src="' + googleStreetViewURL + '?' +
-                'location=' + breweryInfoLat + ',' + breweryInfoLng +
-                '&size=300x200&key=' + googleMapsAPIKey + '"></p>';
-                console.log(googleStreetViewImage);
-            }
 
         })
 
@@ -384,16 +391,20 @@ var viewModel = function () {
         google.maps.event.addListener(brewery.marker,'click',function(){
 
             if (foursquareSuccess) {
-                foursquareRespDisplay = foursquareRespDisplay + '<p><small><em>Address, phone number and other data provided by <a href="https://foursquare.com" target="_blank">Foursquare</a>.</p>';
+                foursquareCredit = '<small><em>Address, phone number and other data provided by <a href="https://foursquare.com" target="_blank">Foursquare</a></em>.';
+            }
+
+            if (foursquareRespDisplay === '') {
+                foursquareRespDisplay = drivingDirections;
             }
 
             // Gather all of the infoWindow content into a variable
             var infoWindowContent = '<div>' +
             '<h4>' + brewery.name() + '</h4>' +
             '<h6>' + brewery.type() + '</h6>' +
-            foursquareRespDisplay +
             googleStreetViewImage +
-            '<p><a target="_blank" href="https://www.google.com/maps/dir/Current+Location/' + brewery.lat() + ',' + brewery.lng() + '">Directions</a></p>' +
+            foursquareRespDisplay +
+            foursquareCredit +
             '</div>';
 
             // Only have the marker bounce animation triggered when a marker or name is clicked
@@ -539,12 +550,6 @@ var viewModel = function () {
 };
 
 /* ---------- View ---------- */
-var map;
-
-// Define the map center upon initial load (County Line Road/I-25)
-var centerLat = 39.566631;
-var centerLng = -104.872287;
-
 // Initialize the map
 function initMap() {
     'use strict';
@@ -553,7 +558,13 @@ function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
             center: new google.maps.LatLng(centerLat, centerLng),
             zoom: 11,
-            disableDefaultUI: true
+            zoomControl: true,
+            scaleControl: true,
+            mapTypeControl: true,
+            mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                mapTypeIds: ['roadmap', 'terrain' , 'hybrid' , 'satellite']
+            }
         });
     } catch (err) {
         alert('Google Map load failure. Please check your internet connection!');
