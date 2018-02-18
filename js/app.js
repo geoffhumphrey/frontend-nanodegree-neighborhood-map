@@ -201,7 +201,7 @@ var viewModel = function () {
      * Help: https://stackoverflow.com/questions/24951991/open-only-one-infowindow-at-a-time-google-maps
      */
     var breweryInfowindow = new google.maps.InfoWindow({
-        maxWidth: 300
+        maxWidth: 225
     });
 
     // For each brewery, set the markers and instantiate InfoWindows
@@ -230,7 +230,7 @@ var viewModel = function () {
         var foursquareSuccess = false;
         var drivingDirections = '<a href="https://www.google.com/maps/dir/Current+Location/' +
             brewery.lat() + ',' + brewery.lng() +
-            '" target="_blank" title="Driving Directions"><span class="fas fa-car"></span></a>';
+            '" target="_blank" title="Driving Directions"><span class="fas fa-car mt-2 mb-2"></span></a>';
         var foursquareCredit = '';
 
         // Help: http://api.jquery.com/jquery.getjson/
@@ -291,7 +291,7 @@ var viewModel = function () {
             if (breweryInfoFacebook !== undefined) {
                 breweryInfoFacebook = ' <a href="https://www.facebook.com/' +
                     breweryInfoFacebook +
-                    '" target="_blank" title="Facebook"><span class="fab fa-facebook mr-2"></span></a>';
+                    '" target="_blank" title="Facebook"><span class="fab fa-facebook mr-2 mt-2 mb-2"></span></a>';
             }
             else {
                  breweryInfoFacebook = '';
@@ -301,7 +301,7 @@ var viewModel = function () {
             if (breweryInfoTwitter !== undefined) {
                 breweryInfoTwitter = ' <a href="https://www.twitter.com/' +
                     breweryInfoTwitter +
-                    '" target="_blank" title="Twitter"><span class="fab fa-twitter mr-2"></span></a>';
+                    '" target="_blank" title="Twitter"><span class="fab fa-twitter mr-2 mt-2 mb-2"></span></a>';
             }
             else {
                  breweryInfoTwitter = '';
@@ -311,7 +311,7 @@ var viewModel = function () {
             if (breweryInfoURL !== undefined) {
                 breweryInfoURL = ' <a href="' +
                     breweryInfoURL +
-                    '" target="_blank" title="Website"><span class="fas fa-link mr-2"></span></a>';
+                    '" target="_blank" title="Website"><span class="fas fa-link mr-2 mt-2 mb-2"></span></a>';
             }
             else {
                  breweryInfoURL = '';
@@ -319,16 +319,16 @@ var viewModel = function () {
 
             // Help make the display of social icons look pretty
             if ((breweryInfoFacebook !== undefined) || (breweryInfoTwitter !== undefined) || (breweryInfoURL !== undefined)) {
-                brewerySocialSeperator = '</p><p>';
+                brewerySocialSeperator = '<br>';
             }
             else {
                 brewerySocialSeperator = '';
             }
 
             // Concat info to be displayed
-            foursquareRespDisplay = '<p>' + breweryInfoAddress + '<br>' +
+            foursquareRespDisplay = breweryInfoAddress + '<br>' +
                 breweryInfoPhone + brewerySocialSeperator + breweryInfoFacebook +
-                breweryInfoTwitter + breweryInfoURL + drivingDirections + '</p>';
+                breweryInfoTwitter + breweryInfoURL + drivingDirections + '<br>';
 
             // Check Google Street View metadata status for lat/lng combo
             // Build metadata URL
@@ -347,9 +347,9 @@ var viewModel = function () {
 
                 // If the status is OK, flag the street view image as good for display
                 if (googleStreetViewMetaStatus === 'OK') {
-                    googleStreetViewImage = '<p><img src="' + googleStreetViewURL + '?' +
+                    googleStreetViewImage = '<p><img class="img-fluid rounded mx-auto d-block" src="' + googleStreetViewURL + '?' +
                         'location=' + breweryInfoLat + ',' + breweryInfoLng +
-                        '&size=275x150&key=' + googleMapsAPIKey + '"></p>';
+                        '&size=225x100&key=' + googleMapsAPIKey + '"></p>';
                         console.log(googleStreetViewImage);
                 }
 
@@ -400,11 +400,15 @@ var viewModel = function () {
 
             // Gather all of the infoWindow content into a variable
             var infoWindowContent = '<div>' +
-            '<h4>' + brewery.name() + '</h4>' +
-            '<h6>' + brewery.type() + '</h6>' +
+            '<h6>' + brewery.name() +
+            ' <em><small class="text-muted">' +
+            brewery.type() +
+            '</small></em></h6>' +
             googleStreetViewImage +
+            '<p>' +
             foursquareRespDisplay +
             foursquareCredit +
+            '</p>' +
             '</div>';
 
             // Only have the marker bounce animation triggered when a marker or name is clicked
@@ -443,17 +447,30 @@ var viewModel = function () {
 
     });
 
+    /*
+     * TODO: Not exactly sure why this isn't working
+     * Commenting out until a solution is found
+     * Unfortunately no time to tackle this at the moment as my time is running out
+     * to confirm my nanodegree with my company
+     */
+
+    /*
     // Put data in alphabetical order by name.
-    // TODO: Not exactly sure why this isn't working
     self.visibleBreweries(self.visibleBreweries().sort(function (x, y) {
+        console.log(x.name);
+        console.log(y.name);
         if (x.name < y.name) return -1;
         if (x.name > y.name) return 1;
         return 0;
     }));
+    */
+
+    /* Changed the following based upon reviewer feedback
+     * MUCH simpler implementation -sometimes I overthink
+     */
 
     self.clearSearchboxes = function () {
-        document.getElementById('searchbox-sm-screen').value = "";
-        document.getElementById('searchbox-lg-screen').value = "";
+        self.userInput('');
     };
 
     /* Filter breweries based upon user input in either search field
@@ -554,21 +571,17 @@ var viewModel = function () {
 function initMap() {
     'use strict';
     // Error handling for map load failure
-    try {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: new google.maps.LatLng(centerLat, centerLng),
-            zoom: 11,
-            zoomControl: true,
-            scaleControl: true,
-            mapTypeControl: true,
-            mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-                mapTypeIds: ['roadmap', 'terrain' , 'hybrid' , 'satellite']
-            }
-        });
-    } catch (err) {
-        alert('Google Map load failure. Please check your internet connection!');
-    }
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: new google.maps.LatLng(centerLat, centerLng),
+        zoom: 11,
+        zoomControl: true,
+        scaleControl: true,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+            mapTypeIds: ['roadmap', 'terrain' , 'hybrid' , 'satellite']
+        }
+    });
 
     // Keep map centered on window resize
     google.maps.event.addDomListener(window, 'resize', function() {
@@ -589,3 +602,15 @@ function initMap() {
 
     ko.applyBindings(new viewModel());
 }
+
+/*
+ * TODO: handle errors in a more graceful fashion
+ * Utilize Knockout to bind any errors to DOM elements
+ * Discussed here: https://discussions.udacity.com/t/error-handling-not-triggering-offline/310591/11
+ * For now, housing a simple error function that triggers an alert box
+ */
+
+function googleError() {
+    console.log('Error Loading Google Map');
+    alert("Google Maps has failed to load. Please check your internet connection and try again.");
+};
