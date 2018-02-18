@@ -613,4 +613,4 @@ function initMap() {
 function googleError() {
     console.log('Error Loading Google Map');
     alert("Google Maps has failed to load. Please check your internet connection and try again.");
-};
+}
